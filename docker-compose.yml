@@ -1,0 +1,44 @@
+###############################################################################
+#                          Generated on phpdocker.io                          #
+###############################################################################
+version: "3.1"
+services:
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+  postgres:
+    image: postgres:alpine
+    container_name: postgres
+    working_dir: /application
+    volumes:
+      - .:/application
+      - ./postgres/data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=hero
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=postgres
+    ports:
+      - "5432:5432"
+
+  php-fpm:
+    build: ./
+    container_name: php-fpm
+    working_dir: /application
+    volumes:
+      - .:/application
+
+  webserver:
+    image: nginx:alpine
+    container_name: webserver
+    working_dir: /application
+    volumes:
+      - .:/application
+      - .:/etc/nginx/conf.d
+      - ./nginx:/var/log/nginx
+    ports:
+      - "80:80"
+
+      

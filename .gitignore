@@ -1,0 +1,14 @@
+vendor
+.idea
+.env
+Homestead.json
+Homestead.yaml
+.phpunit.result.cache
+storage/cert
+storage/logs
+.vscode
+
+/nginx
+/postgres
+.DS_Store
+
