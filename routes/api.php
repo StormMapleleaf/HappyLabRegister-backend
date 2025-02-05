@@ -26,4 +26,5 @@ Route::prefix('user')->group(function() {
     Route::post('/adduser', [UserController::class, 'addUser']);
     Route::post('/login', [UserController::class, 'login']);
     Route::post('/getusers', [UserController::class, 'getUsers']);
+    Route::post('/deleteuser', [UserController::class, 'deleteUser']);
 });

@@ -57,4 +57,15 @@ class UserService
     {
         return $this->user->orderBy('user_id', 'desc')->paginate($perPage, ['*'], 'page', $page);
     }
+
+    public function delete($roleId)
+    {
+        $user = $this->user->where('role_id', $roleId)->first();
+
+        if (!$user) {
+            throw new \Exception('用户不存在');
+        }
+
+        return $user->delete();
+    }
 }

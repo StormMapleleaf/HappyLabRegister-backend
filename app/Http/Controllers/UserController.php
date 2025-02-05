@@ -85,4 +85,18 @@ class UserController extends Controller
 
         return response()->json($users, 200);
     }
+
+    public function deleteUser(Request $request)
+    {
+        $validatedData = $request->validate([
+            'role_id' => 'required|string',
+        ]);
+
+        try {
+            $this->userService->delete($validatedData['role_id']);
+            return response()->json(['message' => '用户已删除'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+    }
 }
