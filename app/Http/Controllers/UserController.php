@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Services\UserService;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Redis;
 
 class UserController extends Controller
 {
@@ -21,6 +22,7 @@ class UserController extends Controller
         $keys = Cache::get('users_cache_keys', []);
         foreach ($keys as $key) {
             Cache::forget($key);
+            Redis::del($key); // 清除 Redis 缓存
         }
         Cache::forget('users_cache_keys');
     }
@@ -53,7 +55,7 @@ class UserController extends Controller
                 $validatedData['phone']
             );
 
-            // $this->clearUsersCache();
+            $this->clearUsersCache(); // 清除缓存
 
             return response()->json($user, 201);
         } catch (\Exception $e) {
@@ -97,10 +99,15 @@ class UserController extends Controller
     
         $cacheKey = "users_page_{$page}_per_page_{$perPage}";
     
-        // 尝试从缓存中获取数据
-        $users = Cache::remember($cacheKey, 600, function () use ($page, $perPage) {
-            return $this->userService->getUsersPaginated($page, $perPage);
-        });
+        // 尝试从 Redis 中获取数据
+        $users = Redis::get($cacheKey);
+        if ($users) {
+            $users = json_decode($users, true);
+        } else {
+            // 如果 Redis 中没有数据，则从数据库中获取并存入 Redis
+            $users = $this->userService->getUsersPaginated($page, $perPage);
+            Redis::setex($cacheKey, 600, json_encode($users));
+        }
     
         // 记录缓存键
         $keys = Cache::get('users_cache_keys', []);
@@ -114,10 +121,10 @@ class UserController extends Controller
 
     public function viewCache(Request $request)
     {
-    $cacheKey = $request->input('key');
-    $cacheContent = Cache::get($cacheKey);
+        $cacheKey = $request->input('key');
+        $cacheContent = Cache::get($cacheKey);
 
-    return response()->json(['cache_key' => $cacheKey, 'cache_content' => $cacheContent], 200);
+        return response()->json(['cache_key' => $cacheKey, 'cache_content' => $cacheContent], 200);
     }
 
     public function deleteUser(Request $request)
@@ -129,7 +136,7 @@ class UserController extends Controller
         try {
             $this->userService->delete($validatedData['role_id']);
 
-            // $this->clearUsersCache();
+            $this->clearUsersCache(); // 清除缓存
 
             return response()->json(['message' => '用户已删除'], 200);
         } catch (\Exception $e) {
