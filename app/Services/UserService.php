@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
-
+use Illuminate\Support\Facades\Hash;
 class UserService
 {
     protected $user;
@@ -35,6 +35,17 @@ class UserService
             'role' => $role,
             'phone' => $phone,
         ]);
+    }
+
+    public function authenticate($roleId, $password)
+    {
+        $user = $this->user->where('role_id', $roleId)->first();
+
+        if ($user && Hash::check($password, $user->password)) {
+            return $user;
+        }
+
+        throw new \Exception('ID或密码错误');
     }
 
     protected function userExists($roleId)

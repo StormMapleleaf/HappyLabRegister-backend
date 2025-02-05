@@ -14,6 +14,7 @@ class UserController extends Controller
         $this->userService = $userService;
     }
 
+    // 添加用户
     public function addUser(Request $request)
     {
         $validatedData = $request->validate([
@@ -41,6 +42,30 @@ class UserController extends Controller
                 $validatedData['phone']
             );
             return response()->json($user, 201);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+    }
+
+    //登录
+    public function login(Request $request)
+    {
+        $validatedData = $request->validate([
+            'role_id' => 'required|string',
+            'password' => 'required|string|min:5',
+        ]);
+
+        try {
+            $user = $this->userService->authenticate(
+                $validatedData['role_id'],
+                $validatedData['password']
+            );
+
+            if ($user && $user->role === '管理员') {
+                return response()->json($user, 200);
+            } else {
+                return response()->json(['error' => '无权限登录'], 403);
+            }
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);
         }
