@@ -21,10 +21,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// User routes
-// Route::prefix('user')->group(function() {
-//     Route::post('/register', [UserController::class, 'register']);
-//     Route::post('/login', [UserController::class, 'login']);
-//     Route::post('/users', [UserController::class, 'getAllUsers']);
-//     Route::get('/captcha', [UserController::class, 'generateCaptcha']);
-// });
+//User routes
+Route::prefix('user')->group(function() {
+    Route::post('/adduser', [UserController::class, 'addUser']);
+});
