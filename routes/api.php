@@ -27,4 +27,5 @@ Route::prefix('user')->group(function() {
     Route::post('/login', [UserController::class, 'login']);
     Route::post('/getusers', [UserController::class, 'getUsers']);
     Route::post('/deleteuser', [UserController::class, 'deleteUser']);
+    Route::post('/viewcache', [UserController::class, 'viewCache']);
 });
