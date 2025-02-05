@@ -70,4 +70,19 @@ class UserController extends Controller
             return response()->json(['error' => $e->getMessage()], 400);
         }
     }
+
+    public function getUsers(Request $request)
+    {
+        $validatedData = $request->validate([
+            'page' => 'required|integer|min:1',
+            'per_page' => 'required|integer|min:1',
+        ]);
+
+        $page = $validatedData['page'];
+        $perPage = $validatedData['per_page'];
+
+        $users = $this->userService->getUsersPaginated($page, $perPage);
+
+        return response()->json($users, 200);
+    }
 }

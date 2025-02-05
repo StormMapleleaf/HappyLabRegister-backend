@@ -52,4 +52,9 @@ class UserService
     {
         return $this->user->where('role_id', $roleId)->exists();
     }
+
+    public function getUsersPaginated($page, $perPage)
+    {
+        return $this->user->orderBy('user_id', 'desc')->paginate($perPage, ['*'], 'page', $page);
+    }
 }
