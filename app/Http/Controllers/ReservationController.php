@@ -65,4 +65,51 @@ class ReservationController extends Controller
         $reservation = Reservation::create($reservationData);
         return response()->json($reservation, 201);
     }
+
+    //签到
+    public function checkIn(Request $request)
+    {
+        $validatedData = $request->validate([
+            'checkin_code' => 'required|string',
+        ]);
+       
+        $reservation = Reservation::where('checkin_code', $validatedData['checkin_code'])->first();
+
+        if (!$reservation) {
+            return response()->json(['error' => '无效的签到码'], 400);
+        }
+
+        if ($reservation->status == '已签到') {
+            return response()->json(['error' => '该预约已签到'], 400);
+        }
+
+        $reservation->status = '已签到';
+        $reservation->checkin_time = Carbon::now('Asia/Shanghai')->format('Y-m-d H:i');
+        $reservation->save();
+
+        return response()->json(['message' => '签到成功', 'reservation' => $reservation], 200);
+    }
+
+    public function getCheckinCodeByRoleId(Request $request)
+    {
+        $validatedData = $request->validate([
+            'role_id' => 'required|string',
+        ]);
+
+        try {
+            $user_id = $this->reservationService->getUserIdByRoleId($validatedData['role_id']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+
+        $reservation = Reservation::where('user_id', $user_id)
+                                ->where('status', '已预约')
+                                ->first();
+
+        if (!$reservation) {
+            return response()->json(['error' => '未找到对应的预约记录'], 404);
+        }
+
+        return response()->json(['checkin_code' => $reservation->checkin_code], 200);
+    }
 }

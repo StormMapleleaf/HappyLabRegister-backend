@@ -32,4 +32,6 @@ Route::prefix('user')->group(function() {
 //Reservation routes
 Route::prefix('reservation')->group(function() {
     Route::post('/addreservation', [ReservationController::class, 'createReservation']);
+    Route::post('/checkin', [ReservationController::class, 'checkIn']);
+    Route::post('/forget_code', [ReservationController::class, 'getCheckinCodeByRoleId']);
 });
