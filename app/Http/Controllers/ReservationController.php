@@ -9,6 +9,7 @@ use App\Services\UserService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\Log;
 
 class ReservationController extends Controller
 {
@@ -49,6 +50,13 @@ class ReservationController extends Controller
             }
 
             Redis::setex($cacheKey, 600, json_encode($reservations));
+        }
+
+        // 记录缓存键
+        $keys = Cache::get('reservations_cache_keys', []);
+        if (!in_array($cacheKey, $keys)) {
+            $keys[] = $cacheKey;
+            Cache::put('reservations_cache_keys', $keys, 600);
         }
 
         return response()->json($reservations, 200);
@@ -100,15 +108,20 @@ class ReservationController extends Controller
         return response()->json($reservation, 201);
     }
 
-    // 清除 Redis 缓存
     protected function clearReservationsCache()
     {
-        $keys = Redis::keys('reservations_page_*');
-        foreach ($keys as $key) {
-            Redis::del($key);
+        $keys = Cache::get('reservations_cache_keys');
+        if (is_array($keys) || is_object($keys)) {
+            foreach ($keys as $key) {
+                Cache::forget($key);
+                Redis::del($key); // 清除 Redis 缓存
+            }
+            Cache::forget('reservations_cache_keys');
+        } else {
+            Log::debug('No cache keys found to clear.');
         }
     }
-
+   
     //签到
     public function checkIn(Request $request)
     {
