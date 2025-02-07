@@ -5,22 +5,53 @@ namespace App\Http\Controllers;
 use App\Models\Reservation;
 use Illuminate\Http\Request;
 use App\Services\ReservationService;
+use App\Services\UserService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Redis;
 
 class ReservationController extends Controller
 {
     protected $reservationService;
+    protected $userService;
 
-    public function __construct(ReservationService $reservationService)
+    public function __construct(ReservationService $reservationService, UserService $userService)
     {
         $this->reservationService = $reservationService;
+        $this->userService = $userService;
     }
 
     // 获取所有预约
-    public function index()
+    public function getReservations(Request $request)
     {
-        $reservations = Reservation::all();
-        return response()->json($reservations);
+        $validatedData = $request->validate([
+            'page' => 'required|integer|min:1',
+            'per_page' => 'required|integer|min:1',
+        ]);
+
+        $page = $validatedData['page'];
+        $perPage = $validatedData['per_page'];
+
+        $cacheKey = "reservations_page_{$page}_per_page_{$perPage}";
+
+        // 尝试从 Redis 中获取数据
+        $reservations = Redis::get($cacheKey);
+        if ($reservations) {
+            $reservations = json_decode($reservations, true);
+        } else {
+            // 如果 Redis 中没有数据，则从数据库中获取并存入 Redis
+            $reservations = Reservation::paginate($perPage, ['*'], 'page', $page);
+            $reservations = $reservations->toArray();
+
+            foreach ($reservations['data'] as &$reservation) {
+                $user = $this->userService->getUserById($reservation['user_id']);
+                $reservation['real_name'] = $user ? $user->real_name : null;
+            }
+
+            Redis::setex($cacheKey, 600, json_encode($reservations));
+        }
+
+        return response()->json($reservations, 200);
     }
 
     // 创建新的预约
@@ -63,7 +94,19 @@ class ReservationController extends Controller
         ];
 
         $reservation = Reservation::create($reservationData);
+
+        $this->clearReservationsCache();
+
         return response()->json($reservation, 201);
+    }
+
+    // 清除 Redis 缓存
+    protected function clearReservationsCache()
+    {
+        $keys = Redis::keys('reservations_page_*');
+        foreach ($keys as $key) {
+            Redis::del($key);
+        }
     }
 
     //签到
@@ -86,6 +129,8 @@ class ReservationController extends Controller
         $reservation->status = '已签到';
         $reservation->checkin_time = Carbon::now('Asia/Shanghai')->format('Y-m-d H:i');
         $reservation->save();
+
+        $this->clearReservationsCache();
 
         return response()->json(['message' => '签到成功', 'reservation' => $reservation], 200);
     }

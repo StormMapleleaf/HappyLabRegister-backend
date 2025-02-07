@@ -68,4 +68,9 @@ class UserService
 
         return $user->delete();
     }
+
+    public function getUserById($userId)
+    {
+        return User::find($userId);
+    }
 }
