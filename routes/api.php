@@ -3,8 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\ReservationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,4 +27,9 @@ Route::prefix('user')->group(function() {
     Route::post('/getusers', [UserController::class, 'getUsers']);
     Route::post('/deleteuser', [UserController::class, 'deleteUser']);
     Route::post('/viewcache', [UserController::class, 'viewCache']);
+});
+
+//Reservation routes
+Route::prefix('reservation')->group(function() {
+    Route::post('/addreservation', [ReservationController::class, 'createReservation']);
 });

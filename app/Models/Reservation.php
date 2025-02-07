@@ -15,16 +15,18 @@ class Reservation extends Model
 
     protected $fillable = [
         'user_id',
-        'date',
+        'reservation_time',
         'checkin_code',
         'checkin_time',
+        'expiration',
         'status',
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
         'checkin_time' => 'datetime',
-        'date' => 'date',
+        'reservation_time' => 'datetime',
+        'expiration' => 'datetime',
     ];
 
     public $timestamps = false;
