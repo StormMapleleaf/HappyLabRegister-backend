@@ -20,6 +20,7 @@ class User extends Model
         'role_id',
         'role',
         'college',
+        'class',
         'phone',
     ];
 

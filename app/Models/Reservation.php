@@ -19,6 +19,7 @@ class Reservation extends Model
         'checkin_code',
         'checkin_time',
         'expiration',
+        'description',
         'status',
     ];
 
