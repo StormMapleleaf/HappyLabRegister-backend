@@ -14,7 +14,7 @@ class CreateReservationTable extends Migration
      */
     public function up()
     {
-        Schema::create('reservations', function (Blueprint $table) {
+        Schema::create('reservation', function (Blueprint $table) {
             $table->id('reservation_id');
             $table->unsignedBigInteger('user_id');
             $table->string('reservation_time', 20);
@@ -36,6 +36,6 @@ class CreateReservationTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('reservations');
+        Schema::dropIfExists('reservation');
     }
 }

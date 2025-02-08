@@ -53,7 +53,7 @@ class ReservationService
             ->where('role', $role)
             ->where('role_id', $roleId)
             ->first();
-
+        
         if ($user) {
             return $user;
         }

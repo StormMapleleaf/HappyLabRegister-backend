@@ -41,12 +41,14 @@ class ReservationController extends Controller
             $reservations = json_decode($reservations, true);
         } else {
             // 如果 Redis 中没有数据，则从数据库中获取并存入 Redis
-            $reservations = Reservation::paginate($perPage, ['*'], 'page', $page);
+            $reservations = Reservation::orderBy('reservation_id', 'desc')->paginate($perPage, ['*'], 'page', $page);
             $reservations = $reservations->toArray();
 
             foreach ($reservations['data'] as &$reservation) {
                 $user = $this->userService->getUserById($reservation['user_id']);
                 $reservation['real_name'] = $user ? $user->real_name : null;
+                $reservation['college'] = $user ? $user->role : null;
+                $reservation['class'] = $user ? $user->class : null;
             }
 
             Redis::setex($cacheKey, 600, json_encode($reservations));
@@ -69,6 +71,7 @@ class ReservationController extends Controller
             'real_name' => 'required|string|max:255',
             'role' => 'required|string|max:255',
             'role_id' => 'required|string|max:255',
+            'description' => 'required|string|max:255',
         ]);
 
         // 验证用户信息
@@ -81,7 +84,7 @@ class ReservationController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);
         }
-
+       
         $user_id = $this->reservationService->getUserIdByRoleId($validatedData['role_id']);
         
         if ($this->reservationService->hasReservationToday($user_id)) {
@@ -98,6 +101,7 @@ class ReservationController extends Controller
             'checkin_code' => $checkin_code,
             'reservation_time' => Carbon::now('Asia/Shanghai')->format('Y-m-d H:i'),
             'expiration' => Carbon::now('Asia/Shanghai')->endOfDay()->format('Y-m-d H:i'),
+            'description' => $validatedData['description'],
             'status' => '已预约',
         ];
 

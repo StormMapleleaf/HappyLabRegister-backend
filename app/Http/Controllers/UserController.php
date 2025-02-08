@@ -37,6 +37,7 @@ class UserController extends Controller
             'college' => 'required|string|max:255',
             'role_id' => 'required|string',
             'role' => 'required|string|max:255',
+            'class' => 'nullable|string|max:255',
             'phone' => 'required|string|max:15',
         ]);
         
@@ -52,6 +53,7 @@ class UserController extends Controller
                 $validatedData['college'],
                 $validatedData['role_id'],
                 $validatedData['role'],
+                $validatedData['class']??null,
                 $validatedData['phone']
             );
 
