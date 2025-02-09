@@ -5,7 +5,7 @@ version: "3.1"
 services:
 
   redis:
-    image: registry.cn-chengdu.aliyuncs.com/stormyu/redis:alpine
+    image: registry.cn-chengdu.aliyuncs.com/stormyu/phpmax:redis
     container_name: redis
     ports:
       - "6379:6379"
@@ -24,14 +24,14 @@ services:
       - "5432:5432"
 
   php-fpm:
-    image: registry.cn-chengdu.aliyuncs.com/stormyu/phpmax：1
+    image: registry.cn-chengdu.aliyuncs.com/stormyu/phpmax:1
     container_name: php-fpm
     working_dir: /application
     volumes:
       - .:/application
 
   webserver:
-    image: registry.cn-chengdu.aliyuncs.com/stormyu/nginx:alpine
+    image: registry.cn-chengdu.aliyuncs.com/stormyu/phpmax:nginx
     container_name: webserver
     working_dir: /application
     volumes:
