@@ -26,7 +26,8 @@ class Kernel extends ConsoleKernel
     {
         // 每天晚上 23:59 运行 ExpireReservations 命令，使用北京时间
         $schedule->command('reservations:expire')
-                 ->dailyAt('23:59')
+                //  ->dailyAt('23:59')
+                 ->everyMinute()
                  ->timezone('Asia/Shanghai');
     }
 
