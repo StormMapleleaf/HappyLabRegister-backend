@@ -143,6 +143,10 @@ class ReservationController extends Controller
             return response()->json(['error' => '该预约已签到'], 400);
         }
 
+        if ($reservation->status == '已过期') {
+            return response()->json(['error' => '该预约已过期'], 400);
+        }
+
         $reservation->status = '已签到';
         $reservation->checkin_time = Carbon::now('Asia/Shanghai')->format('Y-m-d H:i');
         $reservation->save();
