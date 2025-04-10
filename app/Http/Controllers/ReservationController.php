@@ -51,7 +51,7 @@ class ReservationController extends Controller
                 $reservation['class'] = $user ? $user->class : null;
             }
 
-            Redis::setex($cacheKey, 600, json_encode($reservations));
+            // Redis::setex($cacheKey, 600, json_encode($reservations));
         }
 
         // 记录缓存键
