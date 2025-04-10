@@ -103,29 +103,14 @@ class UserController extends Controller
     
         // 尝试从 Redis 中获取数据
         $users = Redis::get($cacheKey);
-        // if ($users) {
-        //     $users = json_decode($users, true);
-        // } else {
-        //     // 如果 Redis 中没有数据，则从数据库中获取并存入 Redis
-        //     $users = $this->userService->getUsersPaginated($page, $perPage);
-        //     Redis::setex($cacheKey, 600, json_encode($users));
-        // }
-
-        // if ($users) {
-        //     $users = json_decode($users, true);
-        // } else {
-        //     try {
-        //         // 如果 Redis 中没有数据，则从数据库中获取
-        //         $users = $this->userService->getUsersPaginated($page, $perPage);
-                
-        //         // 将数据存入 Redis
-        //         // Redis::setex($cacheKey, 600, json_encode($users));
-        //     } catch (\Exception $e) {
-        //         // 捕获数据库读取失败的异常
-        //         return response()->json(['error' => '无法从数据库获取用户数据: ' . $e->getMessage()], 500);
-        //     }
-        // }
-        $users = $this->userService->getUsersPaginated($page, $perPage);
+        if ($users) {
+            $users = json_decode($users, true);
+        } else {
+            // 如果 Redis 中没有数据，则从数据库中获取并存入 Redis
+            $users = $this->userService->getUsersPaginated($page, $perPage);
+            Redis::setex($cacheKey, 600, json_encode($users));
+        }
+    
         // 记录缓存键
         $keys = Cache::get('users_cache_keys', []);
         if (!in_array($cacheKey, $keys)) {
