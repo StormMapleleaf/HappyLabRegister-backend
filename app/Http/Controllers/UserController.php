@@ -99,24 +99,25 @@ class UserController extends Controller
         $page = $validatedData['page'];
         $perPage = $validatedData['per_page'];
     
-        $cacheKey = "users_page_{$page}_per_page_{$perPage}";
-    
+        // $cacheKey = "users_page_{$page}_per_page_{$perPage}";
+        
         // 尝试从 Redis 中获取数据
-        $users = Redis::get($cacheKey);
-        if ($users) {
-            $users = json_decode($users, true);
-        } else {
+        // $users = Redis::get($cacheKey);
+        // if ($users) {
+        //     $users = json_decode($users, true);
+        // } else {
             // 如果 Redis 中没有数据，则从数据库中获取并存入 Redis
-            $users = $this->userService->getUsersPaginated($page, $perPage);
-            Redis::setex($cacheKey, 600, json_encode($users));
-        }
+            //$users = $this->userService->getUsersPaginated($page, $perPage);
+        //     Redis::setex($cacheKey, 600, json_encode($users));
+        // }
     
         // 记录缓存键
-        $keys = Cache::get('users_cache_keys', []);
-        if (!in_array($cacheKey, $keys)) {
-            $keys[] = $cacheKey;
-            Cache::put('users_cache_keys', $keys, 600);
-        }
+        // $keys = Cache::get('users_cache_keys', []);
+        // if (!in_array($cacheKey, $keys)) {
+            // $keys[] = $cacheKey;
+            // Cache::put('users_cache_keys', $keys, 600);
+        // }
+        $users = $this->userService->getUsersPaginated($page, $perPage);
     
         return response()->json($users, 200);
     }

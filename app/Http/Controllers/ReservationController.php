@@ -33,15 +33,34 @@ class ReservationController extends Controller
         $page = $validatedData['page'];
         $perPage = $validatedData['per_page'];
 
-        $cacheKey = "reservations_page_{$page}_per_page_{$perPage}";
+        // $cacheKey = "reservations_page_{$page}_per_page_{$perPage}";
 
-        // 尝试从 Redis 中获取数据
-        $reservations = Redis::get($cacheKey);
-        if ($reservations) {
-            $reservations = json_decode($reservations, true);
-        } else {
-            // 如果 Redis 中没有数据，则从数据库中获取并存入 Redis
-            $reservations = Reservation::orderBy('reservation_id', 'desc')->paginate($perPage, ['*'], 'page', $page);
+        // // 尝试从 Redis 中获取数据
+        // $reservations = Redis::get($cacheKey);
+        // if ($reservations) {
+        //     $reservations = json_decode($reservations, true);
+        // } else {
+        //     // 如果 Redis 中没有数据，则从数据库中获取并存入 Redis
+        //     $reservations = Reservation::orderBy('reservation_id', 'desc')->paginate($perPage, ['*'], 'page', $page);
+        //     $reservations = $reservations->toArray();
+
+        //     foreach ($reservations['data'] as &$reservation) {
+        //         $user = $this->userService->getUserById($reservation['user_id']);
+        //         $reservation['real_name'] = $user ? $user->real_name : null;
+        //         $reservation['college'] = $user ? $user->role : null;
+        //         $reservation['class'] = $user ? $user->class : null;
+        //     }
+
+        //     Redis::setex($cacheKey, 600, json_encode($reservations));
+        // }
+
+        // // 记录缓存键
+        // $keys = Cache::get('reservations_cache_keys', []);
+        // if (!in_array($cacheKey, $keys)) {
+        //     $keys[] = $cacheKey;
+        //     Cache::put('reservations_cache_keys', $keys, 600);
+        // }
+        $reservations = Reservation::orderBy('reservation_id', 'desc')->paginate($perPage, ['*'], 'page', $page);
             $reservations = $reservations->toArray();
 
             foreach ($reservations['data'] as &$reservation) {
@@ -50,17 +69,6 @@ class ReservationController extends Controller
                 $reservation['college'] = $user ? $user->role : null;
                 $reservation['class'] = $user ? $user->class : null;
             }
-
-            Redis::setex($cacheKey, 600, json_encode($reservations));
-        }
-
-        // 记录缓存键
-        $keys = Cache::get('reservations_cache_keys', []);
-        if (!in_array($cacheKey, $keys)) {
-            $keys[] = $cacheKey;
-            Cache::put('reservations_cache_keys', $keys, 600);
-        }
-
         return response()->json($reservations, 200);
     }
 
