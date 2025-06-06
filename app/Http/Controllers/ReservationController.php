@@ -66,7 +66,7 @@ class ReservationController extends Controller
             foreach ($reservations['data'] as &$reservation) {
                 $user = $this->userService->getUserById($reservation['user_id']);
                 $reservation['real_name'] = $user ? $user->real_name : null;
-                $reservation['college'] = $user ? $user->role : null;
+                $reservation['college'] = $user ? $user->college : null;
                 $reservation['class'] = $user ? $user->class : null;
             }
         return response()->json($reservations, 200);
