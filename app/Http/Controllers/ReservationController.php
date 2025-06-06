@@ -68,8 +68,6 @@ class ReservationController extends Controller
                 $reservation['real_name'] = $user ? $user->real_name : null;
                 $reservation['college'] = $user ? $user->college : null;
                 $reservation['class'] = $user ? $user->class : null;
-                $reservation['created_at'] = Carbon::parse($reservation['created_at'])->setTimezone('Asia/Shanghai')->format('Y-m-d H:i:s');
-                $reservation['reservation_time'] = Carbon::parse($reservation['reservation_time'])->setTimezone('Asia/Shanghai')->format('Y-m-d H:i:s');
             }
         return response()->json($reservations, 200);
     }
