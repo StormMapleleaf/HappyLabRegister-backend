@@ -107,10 +107,8 @@ class ReservationController extends Controller
             'role_id' => $validatedData['role_id'],
             'user_id' => $user_id,
             'checkin_code' => $checkin_code,
-            'reservation_time' => Carbon::now('Asia/Shanghai')->toIso8601String(),
-            // 'expiration' => Carbon::now('Asia/Shanghai')->endOfDay()->format('Y-m-d H:i:s'),
-            'expiration' => Carbon::now('Asia/Shanghai')->endOfDay()->toIso8601String(),
-
+            'reservation_time' => Carbon::now('Asia/Shanghai')->format('Y-m-d H:i'),
+            'expiration' => Carbon::now('Asia/Shanghai')->endOfDay()->format('Y-m-d H:i'),
             'description' => $validatedData['description'],
             'status' => '已预约',
         ];
@@ -158,8 +156,7 @@ class ReservationController extends Controller
         }
 
         $reservation->status = '已签到';
-        // $reservation->checkin_time = Carbon::now('Asia/Shanghai')->format('Y-m-d H:i');
-        $reservation->checkin_time = Carbon::now('Asia/Shanghai')->toIso8601String();
+        $reservation->checkin_time = Carbon::now('Asia/Shanghai')->format('Y-m-d H:i');
         $reservation->save();
 
         $this->clearReservationsCache();
